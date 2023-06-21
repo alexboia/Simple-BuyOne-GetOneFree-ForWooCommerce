@@ -1,0 +1,117 @@
+# Copyright (C) 2022 MyClar Software Solutions SRL
+# This file is distributed under the same license as the Buy one get one free plugin.
+msgid ""
+msgstr ""
+"Project-Id-Version: Buy one get one free 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/woocommerce-myc-"
+"bogo\n"
+"POT-Creation-Date: 2022-05-10T11:54:34+00:00\n"
+"PO-Revision-Date: 2022-05-10 15:33+0300\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: ro_RO\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n==0 || (n!=1 && n%100>=1 && n"
+"%100<=19) ? 1 : 2);\n"
+"X-Generator: Poedit 3.0.1\n"
+"X-Domain: wmyc-bogo\n"
+
+#. Plugin Name of the plugin
+#: includes/Settings.php:11 includes/Settings.php:45
+msgid "Buy one get one free"
+msgstr "Cumpara unul si primesti un alt produs gratuit"
+
+#. Description of the plugin
+msgid "Simple buy one get one free plugin."
+msgstr ""
+"Un plugin simplu pentru implementarea promotiilor de tipul \"Cumpara unul si "
+"primesti alt produs gratuit\"."
+
+#. Author of the plugin
+msgid "MyClar Software Solutions SRL"
+msgstr "MyClar Software Solutions SRL"
+
+#. Author URI of the plugin
+msgid "http://myclar.ro/"
+msgstr "http://myclar.ro/"
+
+#: includes/Settings.php:25
+msgid "Buy this and you get %s for free!"
+msgstr "Cumpara acest produs si primesti %s gratuit!"
+
+#: includes/Settings.php:37
+msgid "This product is free for any order you place!"
+msgstr "Acest produs este gratuit pentru orice comanda plasezi!"
+
+#: includes/Settings.php:47
+msgid ""
+"The following options are used to configure MyClar - Buy one get one free "
+"module"
+msgstr ""
+"Urmatoarele optiuni sunt folosite pentru a configura modulul MyClar - Buy "
+"one get one free."
+
+#: includes/Settings.php:51
+msgid "Buy-one-get-one-free product promo message banner format"
+msgstr ""
+"Formatul mesajului pentru banner-ul promotional de tip cumpara-unul-si-"
+"primesti-un-altul-gratuit"
+
+#: includes/Settings.php:52
+msgid ""
+"This message will be displayed if a product is assigned a free product. Use "
+"%s to specify where the free product name and link will be inserted."
+msgstr ""
+"Acest mesaj va fi afisat in pagina unui produs caruia ii este asociat un "
+"produs ce va fi acordat gratuit. Foloseste simbolul %s pentru a specifica "
+"unde anume in mesajul promotional va fi adaugata denumirea produsului gratuit"
+
+#: includes/Settings.php:60
+msgid "Buy-any-get-one-free product promo message banner format"
+msgstr ""
+"Formatul mesajului pentru banner-ul promotional de tip cumpara-orice-si-"
+"primesti-un-produs-gratuit"
+
+#: includes/Settings.php:61
+msgid ""
+"This message will be displayed whenever a product is granted for free on any "
+"order."
+msgstr ""
+"Acest mesaj este afisat va fi afisat in pagina unui produs atunci cand este "
+"oferit gratuit la orice comanda."
+
+#: views/wmyc-bogo-admin-simple-products-related.php:7
+msgid "Assign free product"
+msgstr "Acorda acest produs gratuit"
+
+#: views/wmyc-bogo-admin-simple-products-related.php:9
+msgid "None"
+msgstr "Niciunul"
+
+#: views/wmyc-bogo-admin-simple-products-related.php:14
+msgid ""
+"When the current product is added to the cart, the product you select here "
+"will also be added, for free."
+msgstr ""
+"Cand produsul curent este adaugat in cos, produsul selectat va fi adaugat "
+"gratuit."
+
+#: views/wmyc-bogo-admin-simple-products-related.php:19
+msgid "Grant for free on any order"
+msgstr "Gratuit pentru orice comanda"
+
+#: views/wmyc-bogo-admin-simple-products-related.php:26
+msgid ""
+"When checked, on any order a customer places, the current product will be "
+"granted for free."
+msgstr ""
+"Cand aceasta optiune este activata, de fiecare data cand un client plaseaza "
+"o comanda, produsul curent va fi adaugat gratuit."
+
+#: views/wmyc-bogo-free-product-cart-item-row.php:17
+#: views/wmyc-bogo-free-product-cart-item-row.php:23
+#: views/wmyc-bogo-free-product-order-review-item-row.php:12
+msgid "Free!"
+msgstr "Gratuit!"

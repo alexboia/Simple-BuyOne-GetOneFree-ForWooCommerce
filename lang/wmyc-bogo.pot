@@ -1,0 +1,87 @@
+# Copyright (C) 2022 MyClar Software Solutions SRL
+# This file is distributed under the same license as the Buy one get one free plugin.
+msgid ""
+msgstr ""
+"Project-Id-Version: Buy one get one free 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/woocommerce-myc-bogo\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2022-05-10T11:54:34+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.6.0\n"
+"X-Domain: wmyc-bogo\n"
+
+#. Plugin Name of the plugin
+#: includes/Settings.php:11
+#: includes/Settings.php:45
+msgid "Buy one get one free"
+msgstr ""
+
+#. Description of the plugin
+msgid "Simple buy one get one free plugin."
+msgstr ""
+
+#. Author of the plugin
+msgid "MyClar Software Solutions SRL"
+msgstr ""
+
+#. Author URI of the plugin
+msgid "http://myclar.ro/"
+msgstr ""
+
+#: includes/Settings.php:25
+msgid "Buy this and you get %s for free!"
+msgstr ""
+
+#: includes/Settings.php:37
+msgid "This product is free for any order you place!"
+msgstr ""
+
+#: includes/Settings.php:47
+msgid "The following options are used to configure MyClar - Buy one get one free module"
+msgstr ""
+
+#: includes/Settings.php:51
+msgid "Buy-one-get-one-free product promo message banner format"
+msgstr ""
+
+#: includes/Settings.php:52
+msgid "This message will be displayed if a product is assigned a free product. Use %s to specify where the free product name and link will be inserted."
+msgstr ""
+
+#: includes/Settings.php:60
+msgid "Buy-any-get-one-free product promo message banner format"
+msgstr ""
+
+#: includes/Settings.php:61
+msgid "This message will be displayed whenever a product is granted for free on any order."
+msgstr ""
+
+#: views/wmyc-bogo-admin-simple-products-related.php:7
+msgid "Assign free product"
+msgstr ""
+
+#: views/wmyc-bogo-admin-simple-products-related.php:9
+msgid "None"
+msgstr ""
+
+#: views/wmyc-bogo-admin-simple-products-related.php:14
+msgid "When the current product is added to the cart, the product you select here will also be added, for free."
+msgstr ""
+
+#: views/wmyc-bogo-admin-simple-products-related.php:19
+msgid "Grant for free on any order"
+msgstr ""
+
+#: views/wmyc-bogo-admin-simple-products-related.php:26
+msgid "When checked, on any order a customer places, the current product will be granted for free."
+msgstr ""
+
+#: views/wmyc-bogo-free-product-cart-item-row.php:17
+#: views/wmyc-bogo-free-product-cart-item-row.php:23
+#: views/wmyc-bogo-free-product-order-review-item-row.php:12
+msgid "Free!"
+msgstr ""
