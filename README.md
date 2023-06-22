@@ -39,3 +39,13 @@ The following options can be changed via `WooCommerce - Settings - Products - Bu
 
 ### Product details page
 ![Configuring the plug-in](/assets/screenshots/03-product-page.png)
+
+## License
+The source code is published under the terms of the [BSD New License](https://opensource.org/licenses/BSD-3-Clause) licence.
+
+## Donate
+
+I put some of my free time into developing and maintaining this plugin.
+If helped you in your projects and you are happy with it, you can...
+
+[![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/Q5Q01KGLM)
