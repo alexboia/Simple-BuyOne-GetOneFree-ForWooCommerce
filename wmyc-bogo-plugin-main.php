@@ -3,7 +3,7 @@
  * Plugin Name: Buy one get one free
  * Author: MyClar Software Solutions SRL
  * Author URI: http://myclar.ro/
- * Version: 1.0.1
+ * Version: 0.1.0
  * Description: Simple buy one get one free plugin.
  * Plugin URI: 
  * Text Domain: wmyc-bogo

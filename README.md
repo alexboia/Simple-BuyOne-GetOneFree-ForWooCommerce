@@ -32,10 +32,10 @@ The following options can be changed via `WooCommerce - Settings - Products - Bu
 ## Screenshots
 
 ### Configuring the plug-in
-![Configuring the plug-in](/assets/screenshots/settings.png)
+![Configuring the plug-in](/assets/screenshots/01-settings.png)
 
 ### Configuring a product
-![Configuring a product](/assets/screenshots/product-configuration.png)
+![Configuring a product](/assets/screenshots/02-product-configuration.png)
 
 ### Product details page
-![Configuring the plug-in](/assets/screenshots/product-page.png)
+![Configuring the plug-in](/assets/screenshots/03-product-page.png)
