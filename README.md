@@ -18,3 +18,12 @@ Additionally, the plug-in allows one to configure the messages displayed in the 
 - PHP 7.4.0 or greater.
 
 # Screenshots
+
+## Configuring the plug-in
+![Configuring the plug-in](/assets/screenshots/settings.png)
+
+## Configuring a product
+![Configuring a product](/assets/screenshots/product-configuration.png)
+
+## Product details page
+![Configuring the plug-in](/assets/screenshots/product-page.png)
