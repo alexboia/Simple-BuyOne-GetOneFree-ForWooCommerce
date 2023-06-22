@@ -47,7 +47,7 @@ Requirements
 
 == Installation ==
 
-1. Upload the plugin files to the `/wp-content/plugins/abp01-wp-trip-summary` directory, or install the plugin through the WordPress plugins screen directly.
+1. Upload the plugin files to the `/wp-content/plugins/wmyc-bogo` directory, or install the plugin through the WordPress plugins screen directly.
 2. Activate the plugin through the 'Plugins' screen in WordPress.
 3. Configure the plug-in via `WooCommerce - Settings - Products - Buy one get one free`.
 
