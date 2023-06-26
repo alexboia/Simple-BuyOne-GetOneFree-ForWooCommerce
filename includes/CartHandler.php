@@ -14,18 +14,38 @@ namespace WmycBogo {
 				$qty) {
 			$newCartItemData = $cartItemData;
 			$targetProduct = wc_get_product($productId);
+			$targetVariation = $variationId >= 0 
+				? wc_get_product($variationId) 
+				: null;
 			
-			if ($targetProduct != null && empty($cartItemData['wmyc_bogo_product_for_product_id'])) {
-				$freeProductInfo = ProductHandler::getBogoFreeProduct($targetProduct);
+			if ($targetProduct != null && empty($cartItemData['wmyc_bogo_product_id'])) {
+				$freeProductInfo = ProductHandler::getBogoFreeProduct($targetProduct, $targetVariation);
+
 				if ($freeProductInfo != null && $freeProductInfo->canBeOrdered()) {
 					$freeProduct = $freeProductInfo->getProduct();
 					if ($freeProduct != null) {
-						$newCartItemData = array_merge($newCartItemData, array(
-							'wmyc_bogo_product_id' => $freeProduct->get_id(),
-							'wmyc_bogo_product_qty' => $qty
-						));
+						$dataToAdd = self::_determineNewCartItemDataToAddForFreeProduct($freeProduct, $qty);
+						$newCartItemData = array_merge($newCartItemData, $dataToAdd);
 					}
 				}
+			}
+
+			return $newCartItemData;
+		}
+
+		private static function _determineNewCartItemDataToAddForFreeProduct(\WC_Product $freeProduct, $qty) {
+			if ($freeProduct->get_type() == 'variation') {
+				$newCartItemData = array(
+					'wmyc_bogo_product_id' => $freeProduct->get_parent_id(),
+					'wmyc_bogo_variation_id' => $freeProduct->get_id(),
+					'wmyc_bogo_product_qty' => $qty
+				);
+			} else {
+				$newCartItemData = array(
+					'wmyc_bogo_product_id' => $freeProduct->get_id(),
+					'wmyc_bogo_variation_id' => 0,
+					'wmyc_bogo_product_qty' => $qty
+				);
 			}
 
 			return $newCartItemData;
@@ -45,6 +65,7 @@ namespace WmycBogo {
 
 		private static function _hasBogoFreeProductInfo(array $cartItem) {
 			return !empty($cartItem['wmyc_bogo_product_id']) 
+				&& isset($cartItem['wmyc_bogo_variation_id']) 
 				&& !empty($cartItem['wmyc_bogo_product_qty']);
 		}
 
@@ -67,7 +88,14 @@ namespace WmycBogo {
 		private static function _createOrderLineItemForCartItemBogoFreeProductInfo(array $cartItem) {
 			$bogoProduct = wc_get_product($cartItem['wmyc_bogo_product_id']);
 			if ($bogoProduct != null) {
-				$bogoLineItem = self::_createOrderLineItemForFreeProduct($bogoProduct, $cartItem['wmyc_bogo_product_qty']);
+				$bogoVariation = null;
+				if ($cartItem['wmyc_bogo_variation_id'] > 0) {
+					$bogoVariation = wc_get_product($cartItem['wmyc_bogo_variation_id']);
+				}
+
+				$bogoLineItem = self::_createOrderLineItemForFreeProduct($bogoProduct, 
+					$bogoVariation, 
+					$cartItem['wmyc_bogo_product_qty']);
 			} else {
 				$bogoLineItem = null;
 			}
@@ -75,13 +103,13 @@ namespace WmycBogo {
 			return $bogoLineItem;
 		}
 
-		private static function _createOrderLineItemForFreeProduct(WC_Product $product, $quantity) {
+		private static function _createOrderLineItemForFreeProduct(\WC_Product $product, \WC_Product|null $variation, $quantity) {
 			$lineItem = new WC_Order_Item_Product();
 			$lineItem->set_quantity($quantity);
-			$lineItem->set_variation_id(0);
+			$lineItem->set_variation_id($variation != null ? $variation->get_id() : 0);
 			$lineItem->set_product_id($product->get_id());
-			$lineItem->set_name($product->get_name());
-			$lineItem->set_tax_class($product->get_tax_class());
+			$lineItem->set_name($variation != null ? $variation->get_name() : $product->get_name());
+			$lineItem->set_tax_class($variation != null ? $variation->get_tax_class() : $product->get_tax_class());
 			$lineItem->set_taxes(array());
 			$lineItem->set_total(0);
 			$lineItem->set_total_tax(0);
@@ -145,7 +173,15 @@ namespace WmycBogo {
 			$bagoFreeProducts = ProductHandler::getBagoFreeProducts();
 			foreach ($bagoFreeProducts as $bagoProduct) {
 				if ($bagoProduct->is_in_stock()) {
-					$bagoLineLitem = self::_createOrderLineItemForFreeProduct($bagoProduct, 1);
+					$addProduct = $bagoProduct;
+					$addVariation = null;
+
+					if ($bagoProduct->get_type() == 'variation') {
+						$addProduct = wc_get_product($bagoProduct->get_parent_id());
+						$addVariation = $bagoProduct;
+					}
+
+					$bagoLineLitem = self::_createOrderLineItemForFreeProduct($addProduct, $addVariation, 1);
 					$order->add_item($bagoLineLitem);
 				}
 			}

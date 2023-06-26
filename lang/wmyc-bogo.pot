@@ -60,23 +60,23 @@ msgstr ""
 msgid "This message will be displayed whenever a product is granted for free on any order."
 msgstr ""
 
-#: views/wmyc-bogo-admin-simple-products-related.php:7
+#: views/wmyc-bogo-admin-base-product-related.php:7
 msgid "Assign free product"
 msgstr ""
 
-#: views/wmyc-bogo-admin-simple-products-related.php:9
+#: views/wmyc-bogo-admin-base-product-related.php:9
 msgid "None"
 msgstr ""
 
-#: views/wmyc-bogo-admin-simple-products-related.php:14
+#: views/wmyc-bogo-admin-base-product-related.php:14
 msgid "When the current product is added to the cart, the product you select here will also be added, for free."
 msgstr ""
 
-#: views/wmyc-bogo-admin-simple-products-related.php:19
+#: views/wmyc-bogo-admin-base-product-related.php:19
 msgid "Grant for free on any order"
 msgstr ""
 
-#: views/wmyc-bogo-admin-simple-products-related.php:26
+#: views/wmyc-bogo-admin-base-product-related.php:26
 msgid "When checked, on any order a customer places, the current product will be granted for free."
 msgstr ""
 
