@@ -31,3 +31,15 @@
 	defined('WMYC_BOGO_LOADED') or die;
 ?>
 
+<div>
+	<p class="form-row form-row-full">
+		<label for="wmyc_bogo_free_product_variation_<?php echo esc_attr($data->variationId); ?>"><?php echo esc_html__('Assign free product', 'wmyc-bogo'); ?></label>
+		<select name="wmyc_bogo_free_product_variation[<?php echo esc_attr($data->variationId); ?>]" id="wmyc_bogo_free_product_variation_<?php echo esc_attr($data->variationId); ?>" class="select short">
+			<option value="-1"><?php echo esc_html__('None', 'wmyc-bogo'); ?></option>
+			<option value="-2" <?php echo $data->bogoFreeProductId == '-2' ? 'selected="selected"' : ''; ?>><?php echo esc_html__('Use parent settings', 'wmyc-bogo'); ?></option>
+			<?php foreach ($data->availableProductsForBogo as $id => $name): ?>
+				<option value="<?php echo esc_attr($id); ?>" <?php echo $data->bogoFreeProductId == $id ? 'selected="selected"' : ''; ?>><?php echo esc_html($name); ?></option>
+			<?php endforeach; ?>
+		</select>
+	</p>
+</div>

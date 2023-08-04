@@ -7,6 +7,10 @@ namespace WmycBogo {
     use WP_Post;
 
 	class ProductHandler {
+		const ID_NO_ASSIGNED_BOGO = -1;
+
+		const ID_USE_PARENT_BOGO_SETTINGS = -2;
+
 		const METAKEY_BOGO_FREE_PRODUCT_ID = 'wmyc_bogo_free_product_id';
 
 		const METAKEY_BOGO_FREE_PRODUCT_FROM_DATE = 'wmyc_bogo_free_product_from_date';
@@ -14,6 +18,8 @@ namespace WmycBogo {
 		const METAKEY_BOGO_FREE_PRODUCT_TO_DATE = 'wmyc_bogo_free_product_to_date';
 
 		const OPTION_KEY_BAGO_FREE_PRODUCT_IDS = 'wmyc_bago_free_product_ids';
+
+		private static $_cachedEligibleBogoProductsOptions = null;
 
 		public static function getBagoFreeProductIds() {
 			return get_option(self::OPTION_KEY_BAGO_FREE_PRODUCT_IDS, array());
@@ -42,8 +48,7 @@ namespace WmycBogo {
 				if (!in_array($productId, $bagoFreeProductIds)) {
 					$bagoFreeProductIds[] = $productId;
 					self::_setBagoFreeProductIds($bagoFreeProductIds);
-				}
-				
+				}				
 			}
 		}
 
@@ -73,15 +78,13 @@ namespace WmycBogo {
 		}
 
 		public static function setBogoFreeProduct(\WC_Product $targetProduct, FreeProductInfo $freeProductInfo) {
-			if ($targetProduct instanceof \WC_Product_Simple) {
-				$targetProduct->update_meta_data(self::METAKEY_BOGO_FREE_PRODUCT_ID, 
-					$freeProductInfo->getProductId());
-				$targetProduct->update_meta_data(self::METAKEY_BOGO_FREE_PRODUCT_FROM_DATE, 
-					$freeProductInfo->getFromDate());
-				$targetProduct->update_meta_data(self::METAKEY_BOGO_FREE_PRODUCT_TO_DATE, 
-					$freeProductInfo->getToDate());
-				$targetProduct->save_meta_data();
-			}
+			$targetProduct->update_meta_data(self::METAKEY_BOGO_FREE_PRODUCT_ID, 
+				$freeProductInfo->getProductId());
+			$targetProduct->update_meta_data(self::METAKEY_BOGO_FREE_PRODUCT_FROM_DATE, 
+				$freeProductInfo->getFromDate());
+			$targetProduct->update_meta_data(self::METAKEY_BOGO_FREE_PRODUCT_TO_DATE, 
+				$freeProductInfo->getToDate());
+			$targetProduct->save_meta_data();
 		}
 
 		/**
@@ -152,9 +155,12 @@ namespace WmycBogo {
 			$data->isBagoFreeProduct = self::isBagoFreeProduct($productId);
 
 			if ($freeProductInfo != null) {
-				$data->bogoFreeProductId = $freeProductInfo->getProductId();
-				$data->bogoFreeProductFromDate = $freeProductInfo->getFromDate();
-				$data->bogoFreeProductToDate = $freeProductInfo->getToDate();
+				$data->bogoFreeProductId = $freeProductInfo
+					->getProductId();
+				$data->bogoFreeProductFromDate = $freeProductInfo
+					->getFromDate();
+				$data->bogoFreeProductToDate = $freeProductInfo
+					->getToDate();
 			}
 
 			echo ViewEngine::render('wmyc-bogo-admin-base-product-related.php', 
@@ -163,29 +169,71 @@ namespace WmycBogo {
 
 		public static function renderAdminVariableProductRelatedProductsOptions($loop, array $variationDdata, \WP_Post $variation) {
 			$data = new \stdClass();
+			$productId = $variation->ID;
+			$variationProduct = wc_get_product($productId);
+			$parentProduct = wc_get_product($variationProduct->get_parent_id());
 
-			echo ViewEngine::render('wmyc-bogo-admin-variation-product-related', 
+			$freeProductInfo = self::getBogoFreeProduct($parentProduct, $variationProduct);
+
+			$data = new \stdClass();
+			$data->variationId = $productId;
+			$data->bogoFreeProductId = null;
+			$data->bogoFreeProductFromDate = null;
+			$data->bogoFreeProductToDate = null;
+			$data->isBagoFreeProduct = self::isBagoFreeProduct($productId);
+			$data->availableProductsForBogo = self::_getEligibleBogoProductsOptions($parentProduct->get_id());
+
+			if ($freeProductInfo != null) {
+				$data->bogoFreeProductId = $freeProductInfo->getProductId();
+				$data->bogoFreeProductFromDate = $freeProductInfo->getFromDate();
+				$data->bogoFreeProductToDate = $freeProductInfo->getToDate();
+			} else {
+				$data->bogoFreeProductId = (string)self::ID_USE_PARENT_BOGO_SETTINGS;
+			}
+
+			echo ViewEngine::render('wmyc-bogo-admin-variation-product-related.php', 
 				$data);
 		}
 
 		private static function _getEligibleBogoProductsOptions($excludeProductId) {
-			$options = array();
-			/** @var \WC_Product[] $products */
-			$products = wc_get_products(array(
-				'type' => array( 'simple', 'external', 'variable' ),
-				'status' => 'publish',
-				'orderby' => 'name',
-				'order' => 'DESC',
-				'limit' => -1
-			));
+			$allOptions = self::_getAllEligibleBogoProductsOptions();
 
-			foreach ($products as $p) {
-				if ($p->is_visible()) {
-					$productId = $p->get_id();
+			if (!empty($excludeProductId)) {
+				$options = array();
+				$testExcludeProductId = (string)$excludeProductId;
 
-					if (empty($excludeProductId) || $productId != $excludeProductId) {
+				foreach ($allOptions as $key => $value) {
+					$exclude = ($testExcludeProductId === $key) 
+						|| (stripos($key, $testExcludeProductId . '_') === 0);
+
+					if (!$exclude) {
+						$options[$key] = $value;
+					}
+				}
+			} else {
+				$options = $allOptions;
+			}
+			
+			return $options;
+		}
+
+		private static function _getAllEligibleBogoProductsOptions() {
+			if (self::$_cachedEligibleBogoProductsOptions === null) {
+				$options = array();
+				/** @var \WC_Product[] $products */
+				$products = wc_get_products(array(
+					'type' => array( 'simple', 'external', 'variable' ),
+					'status' => 'publish',
+					'orderby' => 'name',
+					'order' => 'DESC',
+					'limit' => -1
+				));
+	
+				foreach ($products as $p) {
+					if ($p->is_visible()) {
+						$productId = $p->get_id();
 						if ($p->get_type() != 'variable') {
-							$options[$productId] = $p->get_name();
+							$options[(string)$productId] = $p->get_name();
 						} else {
 							/** @var \WC_Product[] $variations */
 							$variations = self::_getProductVariationsForSelection($productId);
@@ -201,8 +249,11 @@ namespace WmycBogo {
 						}
 					}
 				}
-			}
 
+				self::$_cachedEligibleBogoProductsOptions = $options;
+			}
+			
+			$options = self::$_cachedEligibleBogoProductsOptions;
 			return $options;
 		}
 
@@ -235,6 +286,11 @@ namespace WmycBogo {
 
 		private static function _processBogoFreeProductInformation(WC_Product $product) {
 			$bogoFreeProductId = self::_getBogoFreeProductIdFromHttpPost();
+			self::_saveBogoFreeProductId($product, 
+				$bogoFreeProductId);
+		}
+
+		private static function _saveBogoFreeProductId(WC_Product $product, array $bogoFreeProductId) {
 			if ($bogoFreeProductId['product_id'] > 0)	{
 				$bogoFreeProduct = wc_get_product($bogoFreeProductId['product_id']);
 				if ($bogoFreeProduct != null) {
@@ -245,7 +301,7 @@ namespace WmycBogo {
 					self::setBogoFreeProduct($product, 
 						$bogoFreeProductInfo);
 				}
-			} else if ($bogoFreeProductId == -1) {
+			} else if ($bogoFreeProductId['product_id'] == self::ID_NO_ASSIGNED_BOGO) {
 				self::removeBogoFreeProduct($product);
 			}
 		}
@@ -255,7 +311,11 @@ namespace WmycBogo {
 				? sanitize_text_field($_POST['wmyc_bogo_free_product'])
 				: null;
 
-			if (stripos($bogoFreeProductInfo, '_')) {
+			return self::_parseStringBogoFreeProductInfo($bogoFreeProductInfo);
+		}
+
+		private static function _parseStringBogoFreeProductInfo($bogoFreeProductInfo) {
+			if (stripos($bogoFreeProductInfo, '_') !== false) {
 				$bogoFreeProductInfoParts = explode('_', $bogoFreeProductInfo, 2);
 				$bogoFreeProductIds = array(
 					'product_id' => intval($bogoFreeProductInfoParts[0]),
@@ -282,6 +342,43 @@ namespace WmycBogo {
 		private static function _getBagoFreeProductEnableFromHttpPost() {
 			return isset($_POST['wmyc_bago_free_product_enable']) 
 				&& $_POST['wmyc_bago_free_product_enable'] === 'yes';
+		}
+
+		public static function saveAdminProductVariationOptions($variationId, $index) {
+			$variation = wc_get_product_object('variation', $variationId);
+			if ($variation != null) {
+				self::_processBogoFreeProductInformationForVariation($variation);
+				self::_processBagoFreeProductInformationForVariation($variation);
+			}
+		}
+
+		private static function _processBogoFreeProductInformationForVariation(\WC_Product_Variation $variation) {
+			$bogoFreeProductId = self::_getBogoFreeProductIdFromHttpPostForVariation($variation->get_id());
+			self::_saveBogoFreeProductId($variation, 
+				$bogoFreeProductId);
+		}
+
+		private static function _getBogoFreeProductIdFromHttpPostForVariation($variationId) {
+			$bogoFreeProductInfo = isset($_POST['wmyc_bogo_free_product_variation']) 
+					&& isset($_POST['wmyc_bogo_free_product_variation'][$variationId])
+				? sanitize_text_field($_POST['wmyc_bogo_free_product_variation'][$variationId])
+				: null;
+
+			return self::_parseStringBogoFreeProductInfo($bogoFreeProductInfo);
+		}
+
+		private static function _processBagoFreeProductInformationForVariation(\WC_Product_Variation $variation) {	
+			if (self::_getBagoFreeProductEnableFromHttpPostForVariation($variation->get_id())) {
+				self::addBagoFreeProductId($variation->get_id());
+			} else {
+				self::removeBagoFreeProductId($variation->get_id());
+			}
+		}
+
+		private static function _getBagoFreeProductEnableFromHttpPostForVariation($variationId) {
+			return isset($_POST['wmyc_bago_free_product_variation_enable']) 
+				&& isset($_POST['wmyc_bago_free_product_variation_enable'][$variationId])
+				&& $_POST['wmyc_bago_free_product_variation_enable'][$variationId] === 'yes';
 		}
 
 		public static function addBogoFreeProductPromoBannerIfNeeded($shortDescription) {
@@ -392,6 +489,11 @@ namespace WmycBogo {
 				array(__CLASS__, 'saveAdminProductOptions'), 
 				10, 
 				1);
+
+			add_action('woocommerce_save_product_variation', 
+				array(__CLASS__, 'saveAdminProductVariationOptions'), 
+				10, 
+				2);
 
 			add_filter('woocommerce_short_description', 
 				array(__CLASS__, 'addBogoFreeProductPromoBannerIfNeeded'),
