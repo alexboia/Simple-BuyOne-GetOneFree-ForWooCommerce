@@ -11,11 +11,15 @@ namespace WmycBogo {
 
 		const ID_USE_PARENT_BOGO_SETTINGS = -2;
 
+		const ID_USE_PARENT_BAGO_SETTINGS = 'use_parent';
+
 		const METAKEY_BOGO_FREE_PRODUCT_ID = 'wmyc_bogo_free_product_id';
 
 		const METAKEY_BOGO_FREE_PRODUCT_FROM_DATE = 'wmyc_bogo_free_product_from_date';
 
 		const METAKEY_BOGO_FREE_PRODUCT_TO_DATE = 'wmyc_bogo_free_product_to_date';
+		
+		const METAKEY_BAGO_FREE_PRODUCT_VARIATION_USE_PARENT = 'wmyc_bago_free_product_use_parent';
 
 		const OPTION_KEY_BAGO_FREE_PRODUCT_IDS = 'wmyc_bago_free_product_ids';
 
@@ -68,10 +72,31 @@ namespace WmycBogo {
 			}
 		}
 
-		public static function isBagoFreeProduct($productId) {
+		public static function isBagoFreeProduct($productId, $variationId = null) {
 			if (!empty($productId)) {
+				$checkProductId = $productId;
 				$bagoFreeProductIds = self::getBagoFreeProductIds();
-				return in_array($productId, $bagoFreeProductIds);
+
+				if (!empty($variationId) && !self::_shouldUseParentBagoSettings($variationId)) {
+					$checkProductId = $variationId;
+				}
+
+				return in_array($checkProductId, 
+					$bagoFreeProductIds);
+			} else {
+				return false;
+			}
+		}
+
+		private static function _shouldUseParentBagoSettings($variationId) {
+			if (!empty($variationId)) {
+				$variation = wc_get_product_object('variation', $variationId);
+				if ($variation) {
+					return $variation->get_meta(self::METAKEY_BAGO_FREE_PRODUCT_VARIATION_USE_PARENT, true) 
+						=== self::ID_USE_PARENT_BAGO_SETTINGS;
+				} else {
+					return false;
+				}
 			} else {
 				return false;
 			}
@@ -167,20 +192,28 @@ namespace WmycBogo {
 				$data);
 		}
 
-		public static function renderAdminVariableProductRelatedProductsOptions($loop, array $variationDdata, \WP_Post $variation) {
+		public static function renderAdminVariableProductRelatedProductsOptions($loop, array $variationData, \WP_Post $variation) {
 			$data = new \stdClass();
 			$productId = $variation->ID;
 			$variationProduct = wc_get_product($productId);
 			$parentProduct = wc_get_product($variationProduct->get_parent_id());
 
-			$freeProductInfo = self::getBogoFreeProduct($parentProduct, $variationProduct);
+			$freeProductInfo = self::getBogoFreeProduct($parentProduct, 
+				$variationProduct);
+
+			$isBagoFreeProduct = self::isBagoFreeProduct($parentProduct->get_id(), 
+				$variationProduct->get_id());
+
+			$useBagoFreeProductParentSettings = self::_shouldUseParentBagoSettings($variationProduct->get_id());
 
 			$data = new \stdClass();
 			$data->variationId = $productId;
 			$data->bogoFreeProductId = null;
 			$data->bogoFreeProductFromDate = null;
 			$data->bogoFreeProductToDate = null;
-			$data->isBagoFreeProduct = self::isBagoFreeProduct($productId);
+			$data->isBagoFreeProduct = $isBagoFreeProduct;
+			$data->useBagoFreeProductParentSettings = $useBagoFreeProductParentSettings;
+
 			$data->availableProductsForBogo = self::_getEligibleBogoProductsOptions($parentProduct->get_id());
 
 			if ($freeProductInfo != null) {
@@ -368,17 +401,34 @@ namespace WmycBogo {
 		}
 
 		private static function _processBagoFreeProductInformationForVariation(\WC_Product_Variation $variation) {	
-			if (self::_getBagoFreeProductEnableFromHttpPostForVariation($variation->get_id())) {
+			$bagoSpec = self::_getBagoFreeProductEnableFromHttpPostForVariation($variation->get_id());		
+			if ($bagoSpec === 'yes') {
 				self::addBagoFreeProductId($variation->get_id());
-			} else {
+				self::_removeUseBagoFreeProductVariationParentSettings($variation);
+			} else if ($bagoSpec === 'no') {
 				self::removeBagoFreeProductId($variation->get_id());
+				self::_removeUseBagoFreeProductVariationParentSettings($variation);
+			} else if ($bagoSpec === self::ID_USE_PARENT_BAGO_SETTINGS) {
+				self::_setUseBagoFreeProductVariationParentSettings($variation);
 			}
 		}
 
 		private static function _getBagoFreeProductEnableFromHttpPostForVariation($variationId) {
 			return isset($_POST['wmyc_bago_free_product_variation_enable']) 
 				&& isset($_POST['wmyc_bago_free_product_variation_enable'][$variationId])
-				&& $_POST['wmyc_bago_free_product_variation_enable'][$variationId] === 'yes';
+					? $_POST['wmyc_bago_free_product_variation_enable'][$variationId]
+					: 'no';
+		}
+
+		private static function _setUseBagoFreeProductVariationParentSettings(\WC_Product_Variation $variation) {
+			$variation->update_meta_data(self::METAKEY_BAGO_FREE_PRODUCT_VARIATION_USE_PARENT, 
+				self::ID_USE_PARENT_BAGO_SETTINGS);
+			$variation->save_meta_data();
+		}
+
+		private static function _removeUseBagoFreeProductVariationParentSettings(\WC_Product_Variation $variation) {
+			$variation->delete_meta_data(self::METAKEY_BAGO_FREE_PRODUCT_VARIATION_USE_PARENT);
+			$variation->save_meta_data();
 		}
 
 		public static function addBogoFreeProductPromoBannerIfNeeded($shortDescription) {
@@ -463,6 +513,7 @@ namespace WmycBogo {
 			delete_post_meta_by_key(self::METAKEY_BOGO_FREE_PRODUCT_FROM_DATE);
 			delete_post_meta_by_key(self::METAKEY_BOGO_FREE_PRODUCT_TO_DATE);
 			delete_post_meta_by_key(self::METAKEY_BOGO_FREE_PRODUCT_ID);
+			delete_post_meta_by_key(self::METAKEY_BAGO_FREE_PRODUCT_VARIATION_USE_PARENT);
 		}
 
 		public static function init() {
