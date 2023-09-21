@@ -17,6 +17,10 @@ namespace WmycBogo {
 			$targetVariation = $variationId >= 0 
 				? wc_get_product($variationId) 
 				: null;
+
+			if ($targetVariation === false) {
+				$targetVariation = null;
+			}
 			
 			if ($targetProduct != null && empty($cartItemData['wmyc_bogo_product_id'])) {
 				$freeProductInfo = ProductHandler::getBogoFreeProduct($targetProduct, $targetVariation);
